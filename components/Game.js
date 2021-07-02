@@ -10,18 +10,23 @@ const defaultGrid = [
 	["", "", ""],
 ];
 
+const gameStatusWinner = "Winner";
+const gameStatusDraw = "Draw";
+
 const Game = ({ user: userSymbol, cpu: cpuSymbol }) => {
 	const [grid, updateGrid] = useState(defaultGrid);
+	const [currentPlayerMove, setCurrentPlayerMove] = useState(userSymbol);
 	const [gameEnded, setGameEnded] = useState(false);
 	const [gameStatus, setGameStatus] = useState("");
+  const [winningGrid, setWinningGrid] = useState([]);
 
 	const handleCellClick = (rowIndex, colIndex) => {
-		let updatedGrid = grid;
+		let updatedGrid = [...grid];
 		if (updatedGrid[rowIndex][colIndex] === "") {
 			updatedGrid[rowIndex][colIndex] = userSymbol;
 			updateGrid(updatedGrid);
+			setCurrentPlayerMove(cpuSymbol);
 		}
-		new Promise((res) => setTimeout(() => res(makeCpuMove()), 1500));
 	};
 
 	const makeCpuMove = useCallback(() => {
@@ -29,16 +34,18 @@ const Game = ({ user: userSymbol, cpu: cpuSymbol }) => {
 		let updatedGrid = [...grid];
 		updatedGrid[row][col] = cpuSymbol;
 		updateGrid(updatedGrid);
+		setCurrentPlayerMove(userSymbol);
 	});
 
 	const setGameDraw = () => {
 		setGameEnded(true);
-		setGameStatus("Draw");
+		setGameStatus(gameStatusDraw);
 	};
 
-	const setWinner = () => {
+	const setWinner = (winningGrid) => {
+		setWinningGrid(winningGrid);
 		setGameEnded(true);
-		setGameStatus("Winner");
+		setGameStatus(gameStatusWinner);
 	};
 
 	const checkGameOver = () => {
@@ -55,28 +62,35 @@ const Game = ({ user: userSymbol, cpu: cpuSymbol }) => {
 	};
 
 	useEffect(() => {
-		checkGameOver();
-	}, [grid]);
+		const isGameOver = checkGameOver();
+		if (!isGameOver && currentPlayerMove === cpuSymbol) {
+			setTimeout(() => makeCpuMove(), 1500);
+		}
+	}, [currentPlayerMove]);
 
+  const gameWon = gameEnded && gameStatus === gameStatusWinner;
 	return (
 		<View>
 			{grid.map((row, rowIdx) => {
 				return (
 					<DataTable.Row key={rowIdx}>
-						{row.map((cell, cellIdx) => (
-							<DataTable.Cell
-								style={{ padding: 5 }}
-								key={`cell-${rowIdx}-${cellIdx}`}
-							>
-								<Button
-									onPress={() =>
-										!gameEnded ? handleCellClick(rowIdx, cellIdx) : null
-									}
+						{row.map((cell, cellIdx) => {
+              let backgroundStyle = {};
+							return (
+								<DataTable.Cell
+									style={{ padding: 5, ...backgroundStyle }}
+									key={`cell-${rowIdx}-${cellIdx}`}
 								>
-									{grid[rowIdx][cellIdx]}
-								</Button>
-							</DataTable.Cell>
-						))}
+									<Button
+										onPress={() =>
+											!gameEnded ? handleCellClick(rowIdx, cellIdx) : null
+										}
+									>
+										{grid[rowIdx][cellIdx]}
+									</Button>
+								</DataTable.Cell>
+							);
+						})}
 					</DataTable.Row>
 				);
 			})}
