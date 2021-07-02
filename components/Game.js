@@ -1,76 +1,88 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text } from "react-native";
+import { DataTable, Button } from "react-native-paper";
 
 import { hasPlayerWon, getBestMove, isGridFull } from "../helpers/utils";
 
-class Game extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      grid: [
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""]
-      ],
-      userSymbol: "",
-      cpuSymbol: "",
-      gameEnded: false
-      gameStatus: ""
-    }
-  }
+const defaultGrid = [
+	["", "", ""],
+	["", "", ""],
+	["", "", ""],
+];
 
-  componentDidUpdate(prevProps, prevState) {
-    if(prevState.grid != this.state.grid) {
-      this.checkGameOver();
-    }
-  }
+const Game = ({ user: userSymbol, cpu: cpuSymbol }) => {
+	const [grid, updateGrid] = useState(defaultGrid);
+	const [gameEnded, setGameEnded] = useState(false);
+	const [gameStatus, setGameStatus] = useState("");
 
-  checkGameOver() {
-    const { grid } = this.state;
-    winningGrid = hasPlayerWon(grid); 
-    if (winningGrid.length) {
-      this.setWinner(winningGrid);
-    } else if (isGridFull(grid)) {
-      this.setGameDraw();
-    }
-  }
+	const handleCellClick = (rowIndex, colIndex) => {
+		let updatedGrid = grid;
+		if (updatedGrid[rowIndex][colIndex] === "") {
+			updatedGrid[rowIndex][colIndex] = userSymbol;
+			updateGrid(updatedGrid);
+		}
+		new Promise((res) => setTimeout(() => res(makeCpuMove()), 1500));
+	};
 
-  handleCellClick(rowIndex, colIndex) {
-    const { userSymbol, grid } = this.state; 
-    let updatedGrid = grid;
-    if(updatedGrid[rowIndex][colIndex] === "") {
-      updatedGrid[rowIndex][colIndex] = userSymbol;
-      this.setState({ grid: updatedGrid }, this.makeCpuMove);
-    }
-  }
+	const makeCpuMove = useCallback(() => {
+		const [row, col] = getBestMove(grid, userSymbol, cpuSymbol);
+		let updatedGrid = [...grid];
+		updatedGrid[row][col] = cpuSymbol;
+		updateGrid(updatedGrid);
+	});
 
-  makeCpuMove() {
-    const { grid, cpuSymbol } = this.state;
-    const [row, col] = getBestMove(grid);
-    setTimeout(() => {
-      let updatedGrid = [ ...grid ];
-      updatedGrid[row][col] = cpuSymbol;
-      this.setState({
-        grid: updatedGrid
-      });
-    }, 3000);
-  }
+	const setGameDraw = () => {
+		setGameEnded(true);
+		setGameStatus("Draw");
+	};
 
-  setGameDraw() {
-    this.setState({
-      gameEnded: true,
-      gameStatus: "Draw"
-    });
-  }
+	const setWinner = () => {
+		setGameEnded(true);
+		setGameStatus("Winner");
+	};
 
-  setWinner() {
-    this.setState({
-      gameEnded: true,
-      gameStatus: "Winner"
-    });
-  }
+	const checkGameOver = () => {
+		const winningGrid = hasPlayerWon(grid);
+		if (winningGrid.length) {
+			setWinner(winningGrid);
+			return true;
+		}
+		if (isGridFull(grid)) {
+			setGameDraw();
+			return true;
+		}
+		return false;
+	};
 
-  render() {
-    return "";
-  }
-}
+	useEffect(() => {
+		checkGameOver();
+	}, [grid]);
+
+	return (
+		<View>
+			{grid.map((row, rowIdx) => {
+				return (
+					<DataTable.Row key={rowIdx}>
+						{row.map((cell, cellIdx) => (
+							<DataTable.Cell
+								style={{ padding: 5 }}
+								key={`cell-${rowIdx}-${cellIdx}`}
+							>
+								<Button
+									onPress={() =>
+										!gameEnded ? handleCellClick(rowIdx, cellIdx) : null
+									}
+								>
+									{grid[rowIdx][cellIdx]}
+								</Button>
+							</DataTable.Cell>
+						))}
+					</DataTable.Row>
+				);
+			})}
+			{gameEnded && <Text>{gameStatus}</Text>}
+		</View>
+	);
+};
+
+export default Game;
