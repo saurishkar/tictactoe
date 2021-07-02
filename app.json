@@ -7,6 +7,16 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "description": "tic tac toe game with cpu ",
+    "githubUrl": "https://github.com/saurishkar/tictactoe",
+    "ios": {
+      "bundleIdentifier": "com.saurishkar.tictactoe",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.saurishkar.tictactoe",
+      "versionCode": 1
+    }
   }
 }
