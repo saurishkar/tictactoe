@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { Button } from "react-native-paper";
 
 import Game from "../components/Game";
 
-const symbols = {
+const symbols = Object.freeze({
 	naught: "O",
 	cross: "X",
-};
+});
 
 const Home = () => {
 	const [playerSymbols, setPlayerSymbols] = useState({});
