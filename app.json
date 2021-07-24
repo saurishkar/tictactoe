@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "tictactoe",
+    "slug": "tictactoe",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "tictactoe"
+}
