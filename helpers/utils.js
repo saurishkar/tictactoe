@@ -37,22 +37,24 @@ export function hasPlayerWon(arr) {
 }
 
 export function getBestMove(state, player, opponent) {
-  let best = -1000,
-    pos = [],
-    moveGrid = [...state];
+  let best = -1000;
+  let pos = [];
+  let initialState = deepClone2dArray(state);
+  let moveGrid = deepClone2dArray(initialState);
+
   //assigning values of state into moveGrid
 
   //filling moveGrid with the optimal move values
   for (let a = 0; a < 3; a++) {
     for (let b = 0; b < 3; b++) {
-      if (state[a][b] == '') {
-        state[a][b] = opponent;
-        moveGrid[a][b] = findOptimalMove(state, 1, 0, player, opponent);
+      if (initialState[a][b] == '') {
+        initialState[a][b] = opponent;
+        moveGrid[a][b] = findOptimalMove(initialState, 1, 0, player, opponent);
         if (moveGrid[a][b] >= best) {
           best = moveGrid[a][b];
           pos = [a, b];
         }
-        state[a][b] = '';
+        initialState[a][b] = '';
       }
     }
   }
@@ -134,4 +136,8 @@ function isFull(arr) {
     return true;
   }
   return false;
+}
+
+export function deepClone2dArray(arr) {
+  return arr.map((row) => row.slice(0));
 }

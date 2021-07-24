@@ -26,6 +26,12 @@ const Home = () => {
     });
     setStartGame(true);
   };
+
+  const resetGame = () => {
+    setStartGame(false);
+    setPlayerSymbols({});
+  }
+
   return (
     <View>
       <Text>
@@ -58,7 +64,7 @@ const Home = () => {
           </View>
         </>
       )}
-      {startGame && <Game user={playerSymbols.user} cpu={playerSymbols.cpu} />}
+      {startGame && <Game user={playerSymbols.user} cpu={playerSymbols.cpu} reset={resetGame} />}
     </View>
   );
 };
